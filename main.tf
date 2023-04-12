@@ -5,7 +5,7 @@ provider "azurerm" {
 
 locals {
   resource_group_name   = "test-terraform-group"
-  location              = "East Asia"
+  location              = "us-east"
 }
 
 resource "azurerm_resource_group" "main" {
