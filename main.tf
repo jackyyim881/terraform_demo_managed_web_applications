@@ -86,3 +86,21 @@ module "express_route" {
   peering_location    = "eastus2"
 }
 
+
+module "load_balancer" {
+  source = "./modules/load_balancer"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+
+  # Virtual network and subnet
+  virtual_network_name = azurerm_virtual_network.example.name
+  subnet_name           = azurerm_subnet.example.name
+
+  # Public IP
+  public_ip_name = azurerm_public_ip.example.name
+
+  # Application Gateway
+  app_gateway_name      = azurerm_application_gateway.example.name
+  app_gateway_backend_pool_name = azurerm_application_gateway.example.backend_address_pool[0].name
+}
+
