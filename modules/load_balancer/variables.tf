@@ -1,9 +1,9 @@
-
-variable "vnet_name" {
-  type = string
-  description = "Account ID for New Relic"
+variable "location" {
+  type    = string
+  default = "East US"
 }
-variable "vnet_name" {
-  type = string
-  description = "Account ID for New Relic"
+
+variable "resource_group_name" {
+  type    = string
+  default = "example-resources"
 }

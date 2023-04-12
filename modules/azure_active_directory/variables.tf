@@ -1,9 +1,5 @@
-
-variable "vnet_name" {
-  type = string
-  description = "Account ID for New Relic"
-}
-variable "vnet_name" {
-  type = string
-  description = "Account ID for New Relic"
+variable "application_display_name" {
+  description = "The display name of the Azure AD application"
+  type        = string
+  default     = "my-application"
 }
