@@ -1,0 +1,115 @@
+---
+- name: Configure Application Gateway
+  hosts: localhost
+  tasks:
+    - name: Configure rules and listeners
+      # 使用 Ansible Azure 模塊或自定義模塊配置 Application Gateway
+      # 參見：https://docs.ansible.com/ansible/latest/collections/azure/azcollection/index.html
+
+- name: Configure App Service Environment
+  hosts: localhost
+  tasks:
+    - name: Deploy application
+      # 使用 Ansible Azure 模塊或自定義模塊部署應用程式到 App Service Environment
+      # 參見：https://docs.ansible.com/ansible/latest/collections/azure/azcollection/index.html
+
+- name: Configure Azure SQL Database
+  hosts: localhost
+  tasks:
+    - name: Configure database schema and permissions
+# 使用 Ansible Azure 模塊或自定義模塊配置 Azure SQL Database
+# 參見https://docs.ansible.com/ansible/latest/collections/azure/azcollection/index.html
+
+- name: Configure Application Gateway
+  hosts: localhost
+  tasks:
+    - name: Create Application Gateway
+      azure_rm_appgateway:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ app_gateway_name }}"
+        sku:
+          name: Standard_v2
+          tier: Standard_v2
+        gateway_ip_configurations:
+          - name: app_gateway_ip_config
+            subnet:
+              id: "{{ gateway_subnet_id }}"
+        frontend_ip_configurations:
+          - name: app_gateway_frontend_ip
+            public_ip_address:
+              name: "{{ public_ip_name }}"
+        frontend_ports:
+          - name: app_gateway_frontend_port
+            port: 80
+        backend_address_pools:
+          - name: app_gateway_backend_pool
+            backend_addresses:
+              - ip_address: "{{ backend_ip }}"
+        backend_http_settings_collection:
+          - name: app_gateway_http_setting
+            cookie_based_affinity: Disabled
+            port: 80
+            protocol: Http
+            request_timeout: 60
+        http_listeners:
+          - name: app_gateway_http_listener
+            frontend_ip_configuration: app_gateway_frontend_ip
+            frontend_port: app_gateway_frontend_port
+            protocol: Http
+        request_routing_rules:
+          - name: app_gateway_routing_rule
+            rule_type: Basic
+            http_listener: app_gateway_http_listener
+            backend_address_pool: app_gateway_backend_pool
+            backend_http_settings: app_gateway_http_setting
+- name: Configure App Service Environment
+  hosts: localhost
+  tasks:
+    - name: Create App Service Plan
+      azure_rm_appserviceplan:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ app_service_plan_name }}"
+        is_linux: false
+        kind: "app"
+        sku:
+          tier: PremiumV3
+          name: P1v3
+
+    - name: Create App Service
+      azure_rm_appservice:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ app_service_name }}"
+        app_service_plan: "{{ app_service_plan_name }}"
+
+- name: Configure Azure SQL Database
+  hosts: localhost
+  tasks:
+    - name: Create SQL Server
+      azure_rm_sqlserver:
+        resource_group: "{{ resource_group_name }}"
+        name: "{{ sql_server_name }}"
+        location: "{{ location }}"
+        admin_username: "{{ sql_admin_username }}"
+        admin_password: "{{ sql_admin_password }}"
+
+    - name: Create SQL Database
+      azure_rm_sqldatabase:
+        resource_group: "{{ resource_group_name }}"
+        server_name: "{{ sql_server_name }}"
+        name: "{{ sql_database_name }}"
+        location: "{{ location }}"
+
+- name: Manage Azure Active Directory resources
+  hosts: localhost
+  tasks:
+    - name: Create Azure AD application
+      azure_rm_adapplication:
+        display_name: "{{ ad_app_display_name }}"
+        homepage: "https://{{ ad_app_display_name }}"
+        identifier_uris:
+          - "https://{{ ad_app_display_name }}"
+        password: "{{ ad_app_password }}"
+
+    - name: Create Azure AD service principal
+      azure_rm_adserviceprincipal:
+        application_id: "{{ ad_app_application_id }}"
